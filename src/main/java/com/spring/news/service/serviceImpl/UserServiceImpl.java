@@ -2,6 +2,8 @@ package com.spring.news.service.serviceImpl;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import com.spring.news.service.UserService;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 
@@ -26,7 +29,18 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+    
 
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
 
     @Override
     @Transactional
@@ -40,6 +54,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
     
+    @Override
+    public User getUserById(int userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+    
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+    
+    @Override
+    public void deleteUserById(int userId) {
+    	userRepository.deleteById(userId);
+    }
     
     @Override
     public void registerUser(UserDto userDto) {
