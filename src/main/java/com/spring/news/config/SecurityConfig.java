@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 
 
 @Configuration
@@ -14,30 +16,34 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
 	@SuppressWarnings("deprecation")
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf().disable()
-				.authorizeRequests(authorizeRequests -> authorizeRequests.requestMatchers("/auth/**", "/WEB-INF/**")
-						.permitAll().anyRequest().authenticated())
-				.formLogin(formLogin -> formLogin.loginPage("/auth/login") // Đặt trang login tùy chỉnh
-						.defaultSuccessUrl("/users/listUser", true) // Điều hướng tới trang userList sau khi đăng nhập
-																	// thành công
-				).logout(logout -> logout.logoutUrl("/auth/logout") // URL để kích hoạt đăng xuất
-						.logoutSuccessUrl("/auth/login?logout") // URL để chuyển hướng sau khi đăng xuất thành công
-						.invalidateHttpSession(true) // Vô hiệu hóa session
-						.deleteCookies("JSESSIONID") // Xóa cookie session
-						.clearAuthentication(true) // Xóa thông tin xác thực
-						.permitAll());
-		return http.build();
-	}
-
-//    @Bean
-//    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-//        SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
-//        handler.setUseReferer(true);
-//        handler.setDefaultTargetUrl("/users/listUser");
-//        return handler;
-//    }
+	 @Bean
+	    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	        http
+	            // CSRF protection is enabled by default, no need to explicitly enable it
+	            .authorizeRequests(authorizeRequests -> 
+	                authorizeRequests
+	                    .requestMatchers("/auth/**", "/bootstrap/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+	                    .anyRequest().authenticated()
+	            )
+	            .formLogin(formLogin -> 
+	                formLogin
+	                    .loginPage("/auth/login")
+	                    .loginProcessingUrl("/auth/login")
+	                    .defaultSuccessUrl("/users/listUser", true)
+	                    .failureUrl("/auth/login?error=true")
+	                    .permitAll()
+	            )
+	            .logout(logout -> 
+	                logout
+	                    .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
+	                    .logoutSuccessUrl("/auth/login?logout")
+	                    .invalidateHttpSession(true)
+	                    .deleteCookies("JSESSIONID")
+	                    .clearAuthentication(true)
+	                    .permitAll()
+	            );
+	        return http.build();
+	    }
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {

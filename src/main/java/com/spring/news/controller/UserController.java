@@ -31,7 +31,6 @@ public class UserController {
     public String userList(Pageable pageable, Model model) {
         pageable = PageRequest.of(pageable.getPageNumber(), 10);
         Page<User> usersPage = userService.findAll(pageable);
-        System.out.println("SIZE: "+usersPage.getSize());
         model.addAttribute("usersPage", usersPage);
         return "listUser";
     }
